@@ -45,7 +45,7 @@ end
 -- 2D tensor and train a more powerful convolutional or recurrent model on this directly.
 function preprocess_data(raw_data, wordvector_table, opt)
     
-    local data = torch.zeros(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), opt.inputDim, 1)
+    local data = torch.zeros(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), opt.inputDim, opt.len)
     local labels = torch.zeros(opt.nClasses*(opt.nTrainDocs + opt.nTestDocs))
     
     -- use torch.randperm to shuffle the data, since it's ordered by class in the file
@@ -62,14 +62,14 @@ function preprocess_data(raw_data, wordvector_table, opt)
             local document = ffi.string(torch.data(raw_data.content:narrow(1, index, 1))):lower()
             
             -- break each review into words and compute the document average
+            word_count = 1
             for word in document:gmatch("%S+") do
-                if wordvector_table[word:gsub("%p+", "")] then
+                if wordvector_table[word:gsub("%p+", "")] and word_count < opt.len then
                     doc_size = doc_size + 1
-                    data[k]:add(wordvector_table[word:gsub("%p+", "")])
+                    data[{{k},{},{word_count}}]:add(wordvector_table[word:gsub("%p+", "")])
                 end
             end
 
-            data[k]:div(doc_size)
             labels[k] = i
         end
     end
@@ -145,6 +145,7 @@ function main()
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
     opt.idx = 1
+    opt.len = 300
 
     print("Loading word vectors...")
     local glove_table = load_glove(opt.glovePath, opt.inputDim)
@@ -185,4 +186,3 @@ function main()
     print(results)
 end
 
-main()
