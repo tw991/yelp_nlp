@@ -4,6 +4,7 @@ require 'optim'
 
 ffi = require('ffi')
 
+torch.setdefaulttensortype('torch.FloatTensor')
 --- Parses and loads the GloVe word vectors into a hash table:
 -- glove_table['word'] = vector
 function load_glove(path, inputDim)
@@ -67,7 +68,8 @@ function preprocess_data(raw_data, wordvector_table, opt)
                 if wordvector_table[word:gsub("%p+", "")] and word_count < opt.len then
                     doc_size = doc_size + 1
                     data[{{k},{},{word_count}}]:add(wordvector_table[word:gsub("%p+", "")])
-                end
+                    word_count = word_count +1
+		end
             end
 
             labels[k] = i
@@ -101,7 +103,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
             optim.sgd(feval, parameters, opt)
             print("epoch: ", epoch, " batch: ", batch)
         end
-
+        collectgarbage()
         local accuracy = test_model(model, test_data, test_labels, opt)
         print("epoch ", epoch, " error: ", accuracy)
 
@@ -111,13 +113,13 @@ end
 function test_model(model, data, labels, opt)
     
     model:evaluate()
-
-    local pred = model:forward(data)
-    local _, argmax = pred:max(2)
-    local err = torch.ne(argmax:double(), labels:double()):sum() / labels:size(1)
-
-    --local debugger = require('fb.debugger')
-    --debugger.enter()
+    local err = 0
+    for t =1, data:size()[1], 50 do
+        local pred = model:forward(data[{{t, math.min(t+50, data:size()[1])},{},{},{}}])
+        local _, argmax = pred:max(2)
+        err = err + torch.ne(argmax:double(), labels[{{t, math.min(t+50, data:size()[1])}}]:double()):sum() 
+    end
+    err = err / labels:size(1)
 
     return err
 end
@@ -127,8 +129,8 @@ function main()
     -- Configuration parameters
     opt = {}
     -- change these to the appropriate data locations
-    opt.glovePath = "CHANGE_ME" -- path to raw glove data .txt file
-    opt.dataPath = "CHANGE_ME"
+    opt.glovePath = "../glove_50.txt" -- path to raw glove data .txt file
+    opt.dataPath = "../train.t7b"
     -- word vector dimensionality
     opt.inputDim = 50 
     -- nTrainDocs is the number of documents per class used in the training set, i.e.
@@ -148,35 +150,32 @@ function main()
     opt.len = 300
 
     print("Loading word vectors...")
-    local glove_table = load_glove(opt.glovePath, opt.inputDim)
+    glove_table = load_glove(opt.glovePath, opt.inputDim)
     
     print("Loading raw data...")
-    local raw_data = torch.load(opt.dataPath)
-    
+    raw_data = torch.load(opt.dataPath)
+ 
     print("Computing document input representations...")
-    local processed_data, labels = preprocess_data(raw_data, glove_table, opt)
+    processed_data, labels = preprocess_data(raw_data, glove_table, opt)
     
     -- split data into makeshift training and validation sets
-    local training_data = processed_data:sub(1, opt.nClasses*opt.nTrainDocs, 1, processed_data:size(2)):clone()
-    local training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
+    training_data = processed_data:sub(1, opt.nClasses*opt.nTrainDocs, 1, processed_data:size(2)):clone():reshape(opt.nClasses*opt.nTrainDocs, 1, 50, opt.len)
+    training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
     
     -- make your own choices - here I have not created a separate test set
-    local test_data = training_data:clone() 
-    local test_labels = training_labels:clone()
+    test_data = training_data:clone():float() 
+    test_labels = training_labels:clone():float()
 
+    raw_data =nil
+    glove_table = nil
     -- construct model:
     model = nn.Sequential()
-   
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
-    model:add(nn.TemporalConvolution(1, 20, 10, 1))
+    model:add(nn.SpatialConvolution(1, 20, 10, 50, 1,1))
+    model:add(nn.SpatialMaxPooling(3, 1, 3, 1))
     
-    --------------------------------------------------------------------------------------
-    -- Replace this temporal max-pooling module with your log-exponential pooling module:
-    --------------------------------------------------------------------------------------
-    model:add(nn.TemporalMaxPooling(3, 1))
-    
-    model:add(nn.Reshape(20*39, true))
-    model:add(nn.Linear(20*39, 5))
+    model:add(nn.Reshape(20*97, true))
+    model:add(nn.Linear(20*97, 5))
     model:add(nn.LogSoftMax())
 
     criterion = nn.ClassNLLCriterion()
