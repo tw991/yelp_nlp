@@ -1,3 +1,4 @@
+require 'cutorch'
 require 'torch'
 require 'nn'
 require 'optim'
@@ -80,9 +81,7 @@ function preprocess_data(raw_data, wordvector_table, opt)
 end
 
 function train_model(model, criterion, data, labels, test_data, test_labels, opt)
-
     parameters, grad_parameters = model:getParameters()
-    
     -- optimization functional to train the model with torch's optim library
     local function feval(x) 
         local minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
@@ -114,10 +113,10 @@ function test_model(model, data, labels, opt)
     
     model:evaluate()
     local err = 0
-    for t =1, data:size()[1], 50 do
-        local pred = model:forward(data[{{t, math.min(t+50, data:size()[1])},{},{},{}}])
+    for t =1, data:size()[1], opt.minibatchSize do
+        local pred = model:forward(data[{{t, math.min(t+opt.minibatchSize, data:size()[1])},{},{},{}}])
         local _, argmax = pred:max(2)
-        err = err + torch.ne(argmax:double(), labels[{{t, math.min(t+50, data:size()[1])}}]:double()):sum() 
+        err = err + torch.ne(argmax:double(), labels[{{t, math.min(t+opt.minibatchSize, data:size()[1])}}]:double()):sum() 
     end
     err = err / labels:size(1)
 
@@ -140,7 +139,7 @@ function main()
     opt.nTestDocs = 0
     opt.nClasses = 5
     -- SGD parameters - play around with these
-    opt.nEpochs = 5
+    opt.nEpochs = 100
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
     opt.learningRate = 0.1
@@ -171,11 +170,11 @@ function main()
     -- construct model:
     model = nn.Sequential()
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
-    model:add(nn.SpatialConvolution(1, 20, 10, 50, 1,1))
+    model:add(nn.SpatialConvolution(1, 50, 10, 50, 1,1))
     model:add(nn.SpatialMaxPooling(3, 1, 3, 1))
     
-    model:add(nn.Reshape(20*97, true))
-    model:add(nn.Linear(20*97, 5))
+    model:add(nn.Reshape(50*97, true))
+    model:add(nn.Linear(50*97, 5))
     model:add(nn.LogSoftMax())
 
     criterion = nn.ClassNLLCriterion()
@@ -185,3 +184,4 @@ function main()
     print(results)
 end
 
+main()
