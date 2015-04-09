@@ -3,6 +3,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
     model:training()
     model = model:cuda()
     for epoch =1, opt.nEpochs do
+        local order = torch.randperm(opt.nBatches)
         for batch =1, opt.nBatches do
             opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
             local minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone():cuda()
