@@ -1,19 +1,19 @@
 function train_model()
     model:training()
     epoch = epoch or 1
-    local parameters, grad_parameters = model:getParameters()
+    parameters, grad_parameters = model:getParameters()
     -- optimization functional to train the model with torch's optim library
     order = torch.randperm(opt.nBatches)
     for batch =1, opt.nBatches do
         opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
         local minibatch = training_data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, training_data:size(2)):cuda()
         local minibatch_labels = training_labels:sub(opt.idx, opt.idx + opt.minibatchSize):cuda()
-        grad_Parameters:zero()
+        grad_parameters:zero()
         local output = model:forward(minibatch)
         local minibatch_loss = criterion:forward(output, minibatch_labels)
         model:backward(minibatch, criterion:backward(output, minibatch_labels))
         clr = opt.learningRate / (1+epoch * opt.learningRateDecay)
-        parameters:add(-clr, grad_Parameters)
+        parameters:add(-clr, grad_parameters)
         print("epoch: ", epoch, " batch: ", batch)
         collectgarbage()
     end
