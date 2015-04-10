@@ -3,7 +3,7 @@ function main()
     -- Configuration parameters
     opt = {}
     -- change these to the appropriate data locations
-    opt.glovePath = "../glove_50.txt" -- path to raw glove data .txt file
+    opt.glovePath = "../yelps.txt" -- path to raw glove data .txt file
     opt.dataPath = "../train.t7b"
     -- word vector dimensionality
     opt.inputDim = 50 
