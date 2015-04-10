@@ -1,4 +1,5 @@
 function train_model()
+    err = 0
     model:training()
     epoch = epoch or 1
     parameters, grad_parameters = model:getParameters()
@@ -10,6 +11,8 @@ function train_model()
         local minibatch_labels = training_labels:sub(opt.idx, opt.idx + opt.minibatchSize):cuda()
         grad_parameters:zero()
         local output = model:forward(minibatch)
+        local _, argmax = output:max(2)
+        err = err + torch.ne(argmax:double(), minibatch_labels:double()):sum() 
         local minibatch_loss = criterion:forward(output, minibatch_labels)
         model:backward(minibatch, criterion:backward(output, minibatch_labels))
         clr = opt.learningRate / (1+epoch * opt.learningRateDecay)
@@ -17,7 +20,7 @@ function train_model()
         print("epoch: ", epoch, " batch: ", batch)
         collectgarbage()
     end
-    local accuracy = test_model(training_data)
+    local accuracy = err / training_labels:size(1)
     print("Training set: epoch ", epoch, " error: ", accuracy)
     local accuracy1 = test_model(test_data)
     print("Testing set: epoch ", epoch, " error: ", accuracy1)
@@ -25,7 +28,7 @@ function train_model()
 end
 
 
-function test_model(test_data)
+function test_model()
 
     model:evaluate()
     local err = 0
@@ -36,7 +39,7 @@ function test_model(test_data)
         local _, argmax = pred:max(2)
         err = err + torch.ne(argmax:double(), test_labels[{{t, math.min(t+opt.minibatchSize, test_data:size()[1])}}]:double()):sum() 
     end
-    err = err / labels:size(1)
+    err = err / test_labels:size(1)
 
     return err
 end
