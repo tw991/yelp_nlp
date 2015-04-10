@@ -146,7 +146,7 @@ function main()
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
     opt.idx = 1
-    opt.len = 50
+    opt.len = 300
 
     print("Loading word vectors...")
     glove_table = load_glove(opt.glovePath, opt.inputDim)
@@ -172,9 +172,10 @@ function main()
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
     model:add(nn.SpatialConvolution(1, 50, 10, 50, 1,1))
     model:add(nn.SpatialMaxPooling(3, 1, 3, 1))
-    
-    model:add(nn.Reshape(50*97, true))
-    model:add(nn.Linear(50*97, 5))
+    model:add(nn.SpatialConvolution(50,100, 2, 1, 1, 1))
+    model:add(nn.SpatialMaxPooling(2,1,2,1))
+    model:add(nn.Reshape(50*48, true))
+    model:add(nn.Linear(50*48, 5))
     model:add(nn.LogSoftMax())
 
     criterion = nn.ClassNLLCriterion()
