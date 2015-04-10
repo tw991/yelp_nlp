@@ -10,9 +10,9 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         local minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
         model:training()
         if opt.cuda == 'True' then
-            local minibatch_loss = criterion:forward(model:forward(minibatch:cuda()), minibatch_labels:cuda())
+            minibatch_loss = (criterion:forward(model:forward(minibatch:cuda()), minibatch_labels:cuda())):float()
         else
-            local minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
+            minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
         end
         model:zeroGradParameters()
         model:backward(minibatch, criterion:backward(model.output, minibatch_labels))
