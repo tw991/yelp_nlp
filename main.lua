@@ -15,7 +15,7 @@ function main()
     opt.nClasses = 5
     -- SGD parameters - play around with these
     opt.nEpochs = 100
-    opt.minibatchSize = 512
+    opt.minibatchSize = 256
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
     opt.learningRate = 0.1
     opt.learningRateDecay = 0.001
