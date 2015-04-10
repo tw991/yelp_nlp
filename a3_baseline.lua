@@ -169,12 +169,13 @@ function main()
     -- construct model:
     model = nn.Sequential()
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
-    model:add(nn.SpatialConvolution(1, 100, 11, 50, 1,1))
-    model:add(nn.SpatialMaxPooling(3, 1, 3, 1))
-    model:add(nn.SpatialConvolution(100,100, 3, 1, 1, 1))
+    model:add(nn.SpatialConvolution(1, 100, 3, 50, 1,1))
+    model:add(nn.SpatialMaxPooling(2, 1, 2, 1))
+    model:add(nn.SpatialConvolution(100,100, 4, 1, 1, 1))
     model:add(nn.SpatialMaxPooling(2,1,2,1))
-    model:add(nn.Reshape(100*14, true))
-    model:add(nn.Linear(100*14, 256))
+    model:add(nn.Reshape(100*23, true))
+
+    model:add(nn.Linear(100*23, 256))
     model:add(nn.ReLU())
     model:add(nn.Linear(256, 5))
     model:add(nn.LogSoftMax())

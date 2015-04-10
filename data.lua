@@ -1,11 +1,3 @@
-require 'cutorch'
-require 'torch'
-require 'nn'
-require 'optim'
-
-ffi = require('ffi')
-
-torch.setdefaulttensortype('torch.FloatTensor')
 --- Parses and loads the GloVe word vectors into a hash table:
 -- glove_table['word'] = vector
 function load_glove(path, inputDim)
