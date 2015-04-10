@@ -1,7 +1,8 @@
 function train_model(model, criterion, data, labels, test_data, test_labels, opt)
+    model:cuda()
+    criterion:cuda()
+    model:training()
     parameters, grad_parameters = model:getParameters()
-    model = model:cuda()
-    criterion = criterion:cuda()
     -- optimization functional to train the model with torch's optim library
 
 
@@ -11,7 +12,6 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
             opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
             minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
             minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
-            model:training()
             minibatch_loss = criterion:forward(model:forward(minibatch:cuda()):cuda(), minibatch_labels:cuda())
             model:zeroGradParameters()
             model:backward(minibatch:cuda(), criterion:backward(model.output, minibatch_labels:cuda()))
