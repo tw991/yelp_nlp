@@ -61,7 +61,10 @@ function main()
 
     criterion = nn.ClassNLLCriterion()
    
-    train_model(model, criterion, training_data, training_labels, test_data, test_labels, opt)
+    epoch = 1   
+    for i =1, opt.nEpochs do
+        train_model(model, criterion, training_data, training_labels, test_data, test_labels, opt)
+    end
     local results = test_model(model, test_data, test_labels)
     print(results)
 end

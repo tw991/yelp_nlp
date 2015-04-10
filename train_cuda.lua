@@ -2,29 +2,27 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
     model:cuda()
     criterion:cuda()
     model:training()
-    parameters, grad_parameters = model:getParameters()
+    epoch = epoch or 1
+    local parameters, grad_parameters = model:getParameters()
     -- optimization functional to train the model with torch's optim library
-
-
-    for epoch =1, opt.nEpochs do
-        order = torch.randperm(opt.nBatches)
-        for batch =1, opt.nBatches do
-            opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
-            minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
-            minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
-            minibatch_loss = criterion:forward(model:forward(minibatch:cuda()):cuda(), minibatch_labels:cuda())
-            model:zeroGradParameters()
-            model:backward(minibatch:cuda(), criterion:backward(model.output, minibatch_labels:cuda()))
-            clr = opt.learningRate / (1+epoch * opt.learningRateDecay)
-            parameters:add(-clr, grad_Parameters)
-            print("epoch: ", epoch, " batch: ", batch)
-        end
+    order = torch.randperm(opt.nBatches)
+    for batch =1, opt.nBatches do
+        opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
+        minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
+        minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
+        minibatch_loss = criterion:forward(model:forward(minibatch:cuda()):cuda(), minibatch_labels:cuda())
+        model:zeroGradParameters()
+        model:backward(minibatch:cuda(), criterion:backward(model.output, minibatch_labels:cuda()))
+        clr = opt.learningRate / (1+epoch * opt.learningRateDecay)
+        parameters:add(-clr, grad_Parameters)
+        print("epoch: ", epoch, " batch: ", batch)
         collectgarbage()
-        local accuracy = test_model(model, test_data, test_labels, opt)
-        print("epoch ", epoch, " error: ", accuracy)
     end
-    
+    local accuracy = test_model(model, test_data, test_labels, opt)
+    print("epoch ", epoch, " error: ", accuracy)
+    epoch = epoch +1
 end
+
 
 function test_model(model, data, labels, opt)
 
