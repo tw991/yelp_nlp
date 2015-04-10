@@ -20,15 +20,15 @@ function train_model()
         print("epoch: ", epoch, " batch: ", batch)
         collectgarbage()
     end
-    local accuracy = err / training_labels:size(1)
+    local accuracy = test_data(training_data, training_labels)
     print("Training set: epoch ", epoch, " error: ", accuracy)
-    local accuracy1 = test_model(test_data)
+    local accuracy1 = test_model(test_data, test_labels)
     print("Testing set: epoch ", epoch, " error: ", accuracy1)
     epoch = epoch +1
 end
 
 
-function test_model()
+function test_model(test_data, test_labels)
 
     model:evaluate()
     local err = 0
