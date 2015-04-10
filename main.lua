@@ -11,7 +11,7 @@ function main()
     -- here we take the first nTrainDocs documents from each class as training samples
     -- and use the rest as a validation set.
     opt.nTrainDocs = 10000
-    opt.nTestDocs = 0
+    opt.nTestDocs = 10000
     opt.nClasses = 5
     -- SGD parameters - play around with these
     opt.nEpochs = 100
@@ -38,8 +38,8 @@ function main()
     training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
     
     -- make your own choices - here I have not created a separate test set
-    test_data = training_data:clone():float() 
-    test_labels = training_labels:clone():float()
+    test_data = processed_data:sub(opt.nClasses*opt.nTrainDocs+1, opt.nClasses*opt.nTrainDocs + opt.nClasses*opt.nTestDocs, 1, processed_data:size(2)):clone():reshape(opt.nClasses*opt.nTestDocs, 1, 50, opt.len)
+    test_labels = labels:sub(opt.nClasses*opt.nTrainDocs+1, opt.nClasses*opt.nTrainDocs+opt.nClasses*opt.nTestDocs):clone()
 
     raw_data =nil
     glove_table = nil
