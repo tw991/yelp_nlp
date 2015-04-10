@@ -7,7 +7,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         for batch =1, opt.nBatches do
             opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
             local minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone():cuda()
-            local minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
+            local minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone():cuda()
             local minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
             model:zeroGradParameters()
             model:backward(minibatch, criterion:backward(model.output, minibatch_labels))

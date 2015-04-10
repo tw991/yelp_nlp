@@ -2,6 +2,7 @@ require 'cutorch'
 require 'torch'
 require 'nn'
 require 'optim'
+require 'cunn'
 
 ffi = require('ffi')
 
