@@ -1,4 +1,3 @@
-require 'cutorch'
 require 'torch'
 require 'nn'
 require 'optim'
@@ -142,11 +141,11 @@ function main()
     opt.nEpochs = 100
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
-    opt.learningRate = 0.2
+    opt.learningRate = 0.1
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
     opt.idx = 1
-    opt.len = 300
+    opt.len = 100
 
     print("Loading word vectors...")
     glove_table = load_glove(opt.glovePath, opt.inputDim)
@@ -170,12 +169,12 @@ function main()
     -- construct model:
     model = nn.Sequential()
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
-    model:add(nn.SpatialConvolution(1, 50, 10, 50, 1,1))
+    model:add(nn.SpatialConvolution(1, 100, 11, 50, 1,1))
     model:add(nn.SpatialMaxPooling(3, 1, 3, 1))
-    model:add(nn.SpatialConvolution(50,100, 2, 1, 1, 1))
+    model:add(nn.SpatialConvolution(100,100, 3, 1, 1, 1))
     model:add(nn.SpatialMaxPooling(2,1,2,1))
-    model:add(nn.Reshape(50*48, true))
-    model:add(nn.Linear(50*48, 5))
+    model:add(nn.Reshape(100*14, true))
+    model:add(nn.Linear(100*14, 5))
     model:add(nn.LogSoftMax())
 
     criterion = nn.ClassNLLCriterion()
