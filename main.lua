@@ -61,10 +61,12 @@ function main()
 
     criterion = nn.ClassNLLCriterion()
    
+    model:cuda()
+    criterion:cuda()
     epoch = 1   
     for i =1, opt.nEpochs do
-        train_model(model, criterion, training_data, training_labels, test_data, test_labels, opt)
+        train_model()
     end
-    local results = test_model(model, test_data, test_labels)
+    local results = test_model()
     print(results)
 end
