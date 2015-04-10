@@ -142,11 +142,11 @@ function main()
     opt.nEpochs = 100
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
-    opt.learningRate = 0.1
+    opt.learningRate = 0.2
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
     opt.idx = 1
-    opt.len = 300
+    opt.len = 50
 
     print("Loading word vectors...")
     glove_table = load_glove(opt.glovePath, opt.inputDim)
