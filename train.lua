@@ -9,8 +9,8 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         local minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
         local minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
         if opt.cuda == 'True' then
-            minibatch:cuda()
-            minibatch_labels:cuda()
+            minibatch = minibatch:cuda()
+            minibatch_labels = minibatch_labels:cuda()
         end
         model:training()
         local minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
@@ -36,14 +36,14 @@ end
 
 function test_model(model, data, labels, opt)
     if opt.cuda == 'True' then
-        model:cuda()
+        model = model:cuda()
     end
     model:evaluate()
     local err = 0
     for t =1, data:size()[1], opt.minibatchSize do
         local input = data[{{t, math.min(t+opt.minibatchSize, data:size()[1])},{},{},{}}]
         if opt.cuda == 'True' then
-            input:cuda()
+            input = input:cuda()
         end
         local pred = model:forward(input)
         local _, argmax = pred:max(2)
