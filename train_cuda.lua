@@ -23,7 +23,7 @@ function train_model()
 end
 
 
-function test_model(model, data, labels, opt)
+function test_model()
 
     model:evaluate()
     local err = 0
