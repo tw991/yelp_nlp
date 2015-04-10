@@ -8,16 +8,16 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
     local function feval(x) 
         local minibatch = data:sub(opt.idx, opt.idx + opt.minibatchSize, 1, data:size(2)):clone()
         local minibatch_labels = labels:sub(opt.idx, opt.idx + opt.minibatchSize):clone()
-        if opt.cuda == 'True' then
-            minibatch = minibatch:cuda()
-            minibatch_labels = minibatch_labels:cuda()
-        end
         model:training()
-        local minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
+        if opt.cuda == 'True' then
+            local minibatch_loss = criterion:forward(model:forward(minibatch:cuda()), minibatch_labels:cuda())
+        else
+            local minibatch_loss = criterion:forward(model:forward(minibatch), minibatch_labels)
+        end
         model:zeroGradParameters()
         model:backward(minibatch, criterion:backward(model.output, minibatch_labels))
         
-        return minibatch_loss:float(), grad_parameters:float()
+        return minibatch_loss, grad_parameters
     end
     
     for epoch=1,opt.nEpochs do
