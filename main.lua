@@ -22,6 +22,7 @@ function main()
     opt.momentum = 0.1
     opt.idx = 1
     opt.len = 300
+    opt.cuda = 'True'
 
     print("Loading word vectors...")
     glove_table = load_glove(opt.glovePath, opt.inputDim)
