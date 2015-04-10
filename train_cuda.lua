@@ -20,7 +20,7 @@ function train_model()
         print("epoch: ", epoch, " batch: ", batch)
         collectgarbage()
     end
-    local accuracy = test_data(training_data, training_labels)
+    local accuracy = test_model(training_data, training_labels)
     print("Training set: epoch ", epoch, " error: ", accuracy)
     local accuracy1 = test_model(test_data, test_labels)
     print("Testing set: epoch ", epoch, " error: ", accuracy1)
