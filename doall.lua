@@ -8,7 +8,7 @@ ffi = require('ffi')
 
 torch.setdefaulttensortype('torch.FloatTensor')
 dofile 'data.lua'
-dofile 'train.lua'
+dofile 'train_cuda.lua'
 dofile 'main.lua'
 
 main()
