@@ -17,7 +17,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         model:zeroGradParameters()
         model:backward(minibatch, criterion:backward(model.output, minibatch_labels))
         
-        return minibatch_loss, grad_parameters
+        return minibatch_loss:float(), grad_parameters:float()
     end
     
     for epoch=1,opt.nEpochs do
@@ -35,9 +35,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
 end
 
 function test_model(model, data, labels, opt)
-    if opt.cuda == 'True' then
-        model = model:cuda()
-    end
+
     model:evaluate()
     local err = 0
     for t =1, data:size()[1], opt.minibatchSize do

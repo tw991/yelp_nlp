@@ -21,7 +21,7 @@ function main()
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
     opt.idx = 1
-    opt.len = 300
+    opt.len = 100
     opt.cuda = 'True'
 
     print("Loading word vectors...")
